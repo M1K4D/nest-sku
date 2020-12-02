@@ -10,9 +10,9 @@ export class SkuCreateDto {
     @IsNotEmpty()
     quantity: number;
 
-    @IsNumber()
+    @IsString()
     @IsNotEmpty()
-    price: number;
+    price: string;
 
     @IsString()
     @IsOptional()
@@ -29,9 +29,9 @@ export class SkuUpdateDto {
     @IsOptional()
     quantity: number;
 
-    @IsNumber()
+    @IsString()
     @IsOptional()
-    price: number;
+    price: string;
 
     @IsString()
     @IsOptional()

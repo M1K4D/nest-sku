@@ -14,7 +14,7 @@ export class SKU_LOG {
     quantity: number;
 
     @Column({ nullable: true })
-    price: number;
+    price: string;
 
     @Column({ nullable: true })
     note: string;

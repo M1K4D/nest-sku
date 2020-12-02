@@ -3,11 +3,12 @@ import { getConnection } from 'typeorm';
 import { SkuCreateDto, SkuUpdateDto } from './dto/sku.dto';
 import { SKU_DATA } from '../entity/sku_data.entity';
 import { SKU_LOG } from '../entity/sku_log.entity';
-import { SkuRepository } from './sku.repository';
+import { SkuLogRepository, SkuRepository } from './sku.repository';
 
 @Injectable()
 export class SkuService {
-    constructor(private readonly skuRepository: SkuRepository) { }
+    constructor(private readonly skuRepository: SkuRepository,
+        private readonly skulogRepository: SkuLogRepository) { }
     async getSku() {
         try {
             const find = this.skuRepository.find()
@@ -168,21 +169,21 @@ export class SkuService {
         try {
             const found = await this.skuRepository.findOne({ where: { id: id } })
 
-            if(!found) throw new Error(`id ${id} not found`)
+            if (!found) throw new Error(`id ${id} not found`)
             await getConnection()
-            .createQueryBuilder()
-            .delete()
-            .from(SKU_LOG)
-            .where('sku_id = :sku_id', { sku_id: id })
-            .execute();
+                .createQueryBuilder()
+                .delete()
+                .from(SKU_LOG)
+                .where('sku_id = :sku_id', { sku_id: id })
+                .execute();
 
             await getConnection()
-            .createQueryBuilder()
-            .delete()
-            .from(SKU_DATA)
-            .where('id = :id', { id: id })
-            .execute();
-            return{
+                .createQueryBuilder()
+                .delete()
+                .from(SKU_DATA)
+                .where('id = :id', { id: id })
+                .execute();
+            return {
                 success: true,
                 message: `delete id ${id} sucess`,
             }
@@ -194,6 +195,42 @@ export class SkuService {
         }
     }
 
-    
+    async getLogs() {
+        const find = this.skulogRepository.find()
+        const data = [...await find]
+        return {
+            success: true,
+            data: data
+        }
+    }
 
+    async getLogsById(id: number) {
+        const found = this.skulogRepository.find({ where: { sku_id: id } })
+        const data = [...await found]
+        return {
+            data: data
+        }
+    }
+
+    async search(query: any) {
+        try {
+            const { sku, price } = query;
+            const found = await getConnection()
+                .getRepository(SKU_DATA)
+                .createQueryBuilder('skudata')
+                .select()
+                .where('skudata.sku like :sku', { sku: `%${sku}%` })
+                .orWhere('skudata.price like :price', { price: `%${price}%` })
+                .getMany();
+            return {
+                sucess: true,
+                data: found
+            }
+        } catch (error) {
+            throw new BadRequestException({
+                success: false,
+                message: error.message,
+            })
+        }
+    }
 }

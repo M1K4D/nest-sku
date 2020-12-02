@@ -14,7 +14,7 @@ export class SKU_DATA {
     quantity: number;
 
     @Column()
-    price: number;
+    price:string;
 
     @Column({ nullable: true })
     note: string;
