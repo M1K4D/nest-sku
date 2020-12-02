@@ -18,7 +18,7 @@ export class SkuService {
   async getSku(query: any) {
     try {
       const { sku, price } = query;
-      if (sku) {
+      if (sku || price) {
         const find = await getConnection()
           .getRepository(SKU_DATA)
           .createQueryBuilder('skudata')
@@ -204,26 +204,26 @@ export class SkuService {
     };
   }
 
-//   async search(query: any) {
-//     try {
-//       const { sku, price } = query;
-//       const found = await getConnection()
-//         .getRepository(SKU_DATA)
-//         .createQueryBuilder('skudata')
-//         .select()
-//         .where('skudata.sku ilike :sku', { sku: `%${sku}%` })
-//         .orWhere('skudata.price ilike :price', { price: `%${price}%` })
-//         .getMany();
+  //   async search(query: any) {
+  //     try {
+  //       const { sku, price } = query;
+  //       const found = await getConnection()
+  //         .getRepository(SKU_DATA)
+  //         .createQueryBuilder('skudata')
+  //         .select()
+  //         .where('skudata.sku ilike :sku', { sku: `%${sku}%` })
+  //         .orWhere('skudata.price ilike :price', { price: `%${price}%` })
+  //         .getMany();
 
-//       return {
-//         sucess: true,
-//         data: found,
-//       };
-//     } catch (error) {
-//       throw new BadRequestException({
-//         success: false,
-//         message: error.message,
-//       });
-//     }
-//   }
+  //       return {
+  //         sucess: true,
+  //         data: found,
+  //       };
+  //     } catch (error) {
+  //       throw new BadRequestException({
+  //         success: false,
+  //         message: error.message,
+  //       });
+  //     }
+  //   }
 }
