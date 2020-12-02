@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UsePipes, ValidationPipe } from '@nestjs/common';
 import { identity } from 'rxjs';
 import { SkuCreateDto, SkuUpdateDto } from './dto/sku.dto';
 import { SkuService } from './sku.service';
@@ -20,5 +20,15 @@ export class SkuController {
     @Patch(':id/updatesku')
     async updateSku(@Param('id', ParseIntPipe) id, @Body() body: SkuUpdateDto) {
         return this.skuService.updateSku(id,body)
+    }
+
+    @Get('getallentity')
+    async getAllEntity() {
+        return this.skuService.findALL()
+    }
+
+    @Delete(':id/deletesku')
+    async deleteSku(@Param('id',ParseIntPipe)id){
+        return this.skuService.deleteSku(id)
     }
 }

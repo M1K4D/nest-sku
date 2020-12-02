@@ -31,8 +31,8 @@ export class SkuService {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         let err = '';
-        const {sku, quantity, price, note } = body;
-        
+        const { sku, quantity, price, note } = body;
+
         const sku_data = new SKU_DATA();
         const sku_log = new SKU_LOG();
         // test
@@ -81,19 +81,7 @@ export class SkuService {
             if (!found) throw new Error('not found sku code.');
             if (found.quantity + quantity < 0) throw new Error(`quantity not enough`)
             sku_log.sku_id = found;
-            // await getConnection()
-            //     .createQueryBuilder()
-            //     .update(SKU_DATA)
-            //     .set({
-            //         sku_code: sku_code,
-            //         sku_name: sku_name,
-            //         quantity: found.quantity + quantity,
-            //         price: price,
-            //         note: note
 
-            //     })
-            //     .where('id = :id', { id: found.id })
-            //     .execute();
             if (quantity) {
                 await getConnection()
                     .createQueryBuilder()
@@ -160,7 +148,7 @@ export class SkuService {
             const skus = await getConnection()
                 .getRepository(SKU_DATA)
                 .createQueryBuilder('skudata')
-                .leftJoinAndSelect('skudata.sku_id', 'sku_id')
+                .leftJoinAndSelect('skudata.sku_log', 'sku_log')
                 .getMany()
 
             if (!skus) throw new Error(`not found`)
@@ -176,6 +164,36 @@ export class SkuService {
         }
     }
 
+    async deleteSku(id: number) {
+        try {
+            const found = await this.skuRepository.findOne({ where: { id: id } })
 
+            if(!found) throw new Error(`id ${id} not found`)
+            await getConnection()
+            .createQueryBuilder()
+            .delete()
+            .from(SKU_LOG)
+            .where('sku_id = :sku_id', { sku_id: id })
+            .execute();
+
+            await getConnection()
+            .createQueryBuilder()
+            .delete()
+            .from(SKU_DATA)
+            .where('id = :id', { id: id })
+            .execute();
+            return{
+                success: true,
+                message: `delete id ${id} sucess`,
+            }
+        } catch (error) {
+            throw new BadRequestException({
+                success: false,
+                message: error.message,
+            })
+        }
+    }
+
+    
 
 }
