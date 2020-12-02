@@ -100,7 +100,7 @@ export class SkuService {
       const sku_log = new SKU_LOG();
       if (!found) throw new Error('not found sku code.');
       if (found.quantity + quantity < 0) throw new Error(`quantity not enough`);
-      sku_log.sku_id = found;
+
       await getConnection()
         .createQueryBuilder()
         .update(SKU_DATA)
@@ -112,8 +112,11 @@ export class SkuService {
         })
         .where('id = :id', { id: found.id })
         .execute();
+      sku_log.sku_id = found;
+      sku_log.sku = sku;
+      sku_log.price = price;
+      sku_log.note = note;
       sku_log.quantity = quantity;
-
       await queryRunner.manager.save(sku_log);
       try {
         await queryRunner.commitTransaction();
