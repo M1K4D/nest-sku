@@ -7,22 +7,22 @@ export class SKU_LOG {
     @PrimaryGeneratedColumn()
     id:number;
 
-    @Column()
-    sku_name: string;
+    @Column({ nullable: true })
+    sku: string;
 
-    @Column()
+    @Column({ nullable: true })
     quantity: number;
 
-    @Column()
+    @Column({ nullable: true })
     price: number;
 
-    @Column()
+    @Column({ nullable: true })
     note: string;
 
-    @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+    @CreateDateColumn()
     created_at: Date;
 
-    @ManyToOne(() => SKU_DATA, sku_data => sku_data.sku_code)
-    sku_data: SKU_DATA;
+    @ManyToOne(() => SKU_DATA, sku_id => sku_id.id)
+    sku_id: SKU_DATA;
 
 }

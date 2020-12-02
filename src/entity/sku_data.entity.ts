@@ -8,10 +8,7 @@ export class SKU_DATA {
     id:number;
 
     @Column()
-    sku_code: string;
-
-    @Column()
-    sku_name: string;
+    sku: string;
 
     @Column()
     quantity: number;
@@ -19,10 +16,10 @@ export class SKU_DATA {
     @Column()
     price: number;
 
-    @Column()
+    @Column({ nullable: true })
     note: string;
 
-    @OneToMany(() => SKU_LOG,sku_log => sku_log.sku_data)
+    @OneToMany(() => SKU_LOG,sku_log => sku_log.sku_id)
     sku_log:SKU_LOG[];
 
 }
