@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { SkuCreateDto } from './dto/sku.dto';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { identity } from 'rxjs';
+import { SkuCreateDto, SkuUpdateDto } from './dto/sku.dto';
 import { SkuService } from './sku.service';
 
 @Controller('sku')
+@UsePipes(new ValidationPipe())
 export class SkuController {
     constructor(private skuService: SkuService) { }
     @Get('getsku')
@@ -13,5 +15,10 @@ export class SkuController {
     @Post('addsku')
     async addsku(@Body() body: SkuCreateDto) {
         return this.skuService.addSKU(body)
+    }
+
+    @Patch(':id/updatesku')
+    async updateSku(@Param('id', ParseIntPipe) id, @Body() body: SkuUpdateDto) {
+        return this.skuService.updateSku(id,body)
     }
 }

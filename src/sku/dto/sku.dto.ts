@@ -18,3 +18,22 @@ export class SkuCreateDto {
     @IsOptional()
     note: string;
 }
+
+export class SkuUpdateDto {
+
+    @IsString()
+    @IsOptional()
+    sku: string;
+
+    @IsNumber()
+    @IsOptional()
+    quantity: number;
+
+    @IsNumber()
+    @IsOptional()
+    price: number;
+
+    @IsString()
+    @IsOptional()
+    note: string;
+}

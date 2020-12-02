@@ -6,7 +6,7 @@ export const orm_config: TypeOrmModule = {
     "port": 5432,
     "username": "postgres",
     "password": "123456",
-    "database": "sku",
+    "database": "sku_2",
     "entities": ["dist/**/*.entity{.ts,.js}"],
     "synchronize": true,
     // logging: false

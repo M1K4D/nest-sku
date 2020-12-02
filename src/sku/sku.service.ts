@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { getConnection } from 'typeorm';
-import { SkuCreateDto } from './dto/sku.dto';
+import { SkuCreateDto, SkuUpdateDto } from './dto/sku.dto';
 import { SKU_DATA } from '../entity/sku_data.entity';
 import { SKU_LOG } from '../entity/sku_log.entity';
 import { SkuRepository } from './sku.repository';
@@ -68,19 +68,19 @@ export class SkuService {
 
         }
     }
-    async updateSku(id: number, body: any) {
+    async updateSku(id: number, body: SkuUpdateDto) {
         const connection = getConnection();
         const queryRunner = connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         let err = '';
         try {
-            const { sku, sku_name, quantity, price, note } = body;
+            const { sku, quantity, price, note } = body;
             const found = await this.skuRepository.findOne({ where: { id: id } })
             const sku_log = new SKU_LOG();
             if (!found) throw new Error('not found sku code.');
             if (found.quantity + quantity < 0) throw new Error(`quantity not enough`)
-
+            sku_log.sku_id = found;
             // await getConnection()
             //     .createQueryBuilder()
             //     .update(SKU_DATA)
@@ -107,7 +107,7 @@ export class SkuService {
                 await getConnection()
                     .createQueryBuilder()
                     .update(SKU_DATA)
-                    .set({ sku: sku_name })
+                    .set({ sku: sku })
                     .where('id = :id', { id: found.id })
                     .execute();
                 sku_log.sku = sku;
@@ -130,12 +130,6 @@ export class SkuService {
                     .execute();
                 sku_log.note = note;
             }
-            // sku_log.sku_id = found;
-            // sku_log.sku_code = sku_code;
-            // sku_log.sku_name = sku_name;
-            // sku_log.quantity = quantity;
-            // sku_log.price = price;
-            // sku_log.note = note;
             await queryRunner.manager.save(sku_log);
             try {
                 await queryRunner.commitTransaction();
@@ -158,6 +152,27 @@ export class SkuService {
                 success: false,
                 message: error.message,
             })
+        }
+    }
+
+    async findALL() {
+        try {
+            const skus = await getConnection()
+                .getRepository(SKU_DATA)
+                .createQueryBuilder('skudata')
+                .leftJoinAndSelect('skudata.sku_id', 'sku_id')
+                .getMany()
+
+            if (!skus) throw new Error(`not found`)
+            return {
+                success: true,
+                data: skus
+            }
+        } catch (error) {
+            throw new NotFoundException({
+                success: false,
+                message: error.message,
+            });
         }
     }
 
