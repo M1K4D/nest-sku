@@ -208,6 +208,7 @@ export class SkuService {
         const found = this.skulogRepository.find({ where: { sku_id: id } })
         const data = [...await found]
         return {
+            sucess: true,
             data: data
         }
     }
