@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany, ManyToOne, CreateDateColumn, UpdateDateColumn, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, ManyToOne, CreateDateColumn, PrimaryGeneratedColumn } from "typeorm";
 import { SKU_DATA } from "./sku_data.entity";
 
 @Entity()

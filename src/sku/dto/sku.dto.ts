@@ -1,5 +1,4 @@
 import { isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
-// @Optional()
 export class SkuCreateDto {
 
     @IsString()

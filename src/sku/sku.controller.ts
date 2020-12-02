@@ -1,7 +1,4 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
-import { query } from 'express';
-import { get } from 'http';
-import { identity } from 'rxjs';
 import { SkuCreateDto, SkuUpdateDto } from './dto/sku.dto';
 import { SkuService } from './sku.service';
 
