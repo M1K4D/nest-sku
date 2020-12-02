@@ -45,8 +45,7 @@ export class SkuController {
     }
 
     @Get('search')
-    async Search(@Query()query){
+    async Search(@Query() query) {
         return this.skuService.search(query)
-
     }
 }
