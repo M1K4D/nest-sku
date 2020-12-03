@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm/dist/typeorm.module';
-import { CATEGORY } from 'src/entity/category.entity';
 import { SkuController } from './sku.controller';
-import { categoryRepository, SkuLogRepository, SkuRepository } from './sku.repository';
+import { categoryRepository, SkuLogRepository, SkuRepository } from '../repository/sku.repository';
 import { SkuService } from './sku.service';
 
 @Module({

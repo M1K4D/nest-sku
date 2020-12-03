@@ -55,8 +55,8 @@ export class SkuController {
     return this.skuService.getLogsById(id);
   }
 
-  @Post('createcategory')
-  async createCategory(@Body() body: categoryCreateDto) {
-    return this.skuService.createCategory(body);
-  }
+  // @Post('createcategory')
+  // async createCategory(@Body() body: categoryCreateDto) {
+  //   return this.skuService.createCategory(body);
+  // }
 }

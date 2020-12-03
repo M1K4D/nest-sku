@@ -11,7 +11,7 @@ import {
   categoryRepository,
   SkuLogRepository,
   SkuRepository,
-} from './sku.repository';
+} from '../repository/sku.repository';
 import { CATEGORY } from 'src/entity/category.entity';
 
 @Injectable()
@@ -21,35 +21,6 @@ export class SkuService {
     private readonly skulogRepository: SkuLogRepository,
     private readonly categoryRepository: categoryRepository,
   ) {}
-  async createCategory(body: any) {
-    const connection = getConnection();
-    const queryRunner = connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    let err = '';
-    const { category_name } = body;
-    const category = new CATEGORY();
-    try {
-      category.category_name = category_name;
-      await queryRunner.manager.save(category);
-      await queryRunner.commitTransaction();
-    } catch (error) {
-      console.log('error message ::', error.message);
-      await queryRunner.rollbackTransaction();
-      err = error.message;
-    } finally {
-      await queryRunner.release();
-      if (err)
-        throw new BadRequestException({
-          success: false,
-          message: err,
-        });
-      return {
-        success: true,
-        message: 'add success',
-      };
-    }
-  }
 
   async createSKU(body: SkuCreateDto) {
     const connection = getConnection();
@@ -78,10 +49,10 @@ export class SkuService {
       } else if (category_name && find) {
         sku_data.category_id = find;
       } else {
-        const found = await this.categoryRepository.findOne({
+        const find = await this.categoryRepository.findOne({
           where: { id: 1 },
         });
-        sku_data.category_id = found;
+        sku_data.category_id = find;
       }
       await queryRunner.manager.save(sku_data);
 
@@ -114,13 +85,20 @@ export class SkuService {
     try {
       const { sku, price } = query;
       if (sku || price) {
-        const find = await getConnection()
+        const query = await getConnection()
           .getRepository(SKU_DATA)
           .createQueryBuilder('skudata')
-          .select()
-          .where('skudata.sku ilike :sku', { sku: `%${sku}%` })
-          .orWhere('skudata.price ilike :price', { price: `%${price}%` })
-          .getMany();
+          .select();
+        // .andWhere('skudata.sku ilike :sku', { sku: `%${sku}%` })
+        // .andWhere('skudata.price ilike :price', { price: `%${price}%` })
+        // .getMany();
+        if (sku) {
+          query.andWhere('skudata.sku ilike :sku', { sku: `%${sku}%` });
+        }
+        if (price) {
+          query.andWhere('skudata.price ilike :price', { price: `%${price}%` });
+        }
+        const find = await query.getMany();
         return {
           success: true,
           data: find,
@@ -151,20 +129,54 @@ export class SkuService {
       const { sku, quantity, price, note, category_name } = body;
       const found = await this.skuRepository.findOne({ where: { id: id } });
       const sku_log = new SKU_LOG();
+      const category = new CATEGORY();
       if (!found) throw new Error('not found sku code.');
       if (found.quantity + quantity < 0) throw new Error(`quantity not enough`);
 
       await getConnection()
-        .createQueryBuilder()
-        .update(SKU_DATA)
-        .set({
-          sku: sku,
-          quantity: found.quantity + quantity,
-          price: price,
-          note: note,
-        })
-        .where('id = :id', { id: found.id })
-        .execute();
+      .createQueryBuilder()
+      .update(SKU_DATA)
+      .set({
+        sku: sku,
+        quantity: found.quantity + quantity,
+        price: price,
+        note: note,
+      })
+      .where('id = :id', { id: found.id })
+      .execute();
+
+      // const find = await this.categoryRepository.findOne({
+      //   where: { category_name: category_name },
+      // });
+      // if (category_name && !find) {
+      //   category.category_name = category_name;
+      //   await queryRunner.manager.save(category);
+      //   await getConnection()
+      //     .createQueryBuilder()
+      //     .update(SKU_DATA)
+      //     .set({
+      //       sku: sku,
+      //       quantity: found.quantity + quantity,
+      //       price: price,
+      //       note: note,
+      //       category_id: category,
+      //     })
+      //     .where('id = :id', { id: found.id })
+      //     .execute();
+      // } else if (category_name && find) {
+      //   await getConnection()
+      //     .createQueryBuilder()
+      //     .update(SKU_DATA)
+      //     .set({
+      //       sku: sku,
+      //       quantity: found.quantity + quantity,
+      //       price: price,
+      //       note: note,
+      //       category_id: find,
+      //     })
+      //     .where('id = :id', { id: found.id })
+      //     .execute();
+      // }
       sku_log.sku_id = found;
       sku_log.sku = sku;
       sku_log.price = price;

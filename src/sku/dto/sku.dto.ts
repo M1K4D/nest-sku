@@ -41,5 +41,6 @@ export class SkuUpdateDto {
     note: string;
 
     @IsString()
+    @IsOptional()
     category_name: string;
 }
