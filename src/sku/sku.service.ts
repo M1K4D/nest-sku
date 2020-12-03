@@ -8,6 +8,7 @@ import { SkuCreateDto, SkuUpdateDto } from './dto/sku.dto';
 import { SKU_DATA } from '../entity/sku_data.entity';
 import { SKU_LOG } from '../entity/sku_log.entity';
 import { SkuLogRepository, SkuRepository } from './sku.repository';
+import { CATEGORY } from 'src/entity/category.entity';
 
 @Injectable()
 export class SkuService {
@@ -15,38 +16,8 @@ export class SkuService {
     private readonly skuRepository: SkuRepository,
     private readonly skulogRepository: SkuLogRepository,
   ) {}
-  async getSku(query: any) {
-    try {
-      const { sku, price } = query;
-      if (sku || price) {
-        const find = await getConnection()
-          .getRepository(SKU_DATA)
-          .createQueryBuilder('skudata')
-          .select()
-          .where('skudata.sku ilike :sku', { sku: `%${sku}%` })
-          .orWhere('skudata.price ilike :price', { price: `%${price}%` })
-          .getMany();
-        return {
-          success: true,
-          data: find,
-        };
-      } else {
-        const find = await this.skuRepository.find();
-        return {
-          success: true,
-          data: find,
-        };
-      }
-    } catch (error) {
-      console.log('error message ::', error.message);
-      throw new NotFoundException({
-        success: false,
-        message: error.message,
-      });
-    }
-  }
 
-  async addSKU(body: SkuCreateDto) {
+  async createSKU(body: SkuCreateDto) {
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
     await queryRunner.connect();
@@ -56,7 +27,6 @@ export class SkuService {
 
     const sku_data = new SKU_DATA();
     const sku_log = new SKU_LOG();
-    // test
     try {
       sku_data.sku = sku;
       sku_data.quantity = quantity;
@@ -88,6 +58,68 @@ export class SkuService {
       };
     }
   }
+
+  async createCategory(body: any) {
+    const connection = getConnection();
+    const queryRunner = connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    let err = '';
+    const { category_name } = body;
+    const category = new CATEGORY();
+    try {
+      category.category_name = category_name;
+      await queryRunner.manager.save(category);
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      console.log('error message ::', error.message);
+      await queryRunner.rollbackTransaction();
+      err = error.message;
+    } finally {
+      await queryRunner.release();
+      if (err)
+        throw new BadRequestException({
+          success: false,
+          message: err,
+        });
+      return {
+        success: true,
+        message: 'add success',
+      };
+    }
+  }
+
+  async getSku(query: any) {
+    try {
+      const { sku, price } = query;
+      if (sku || price) {
+        const find = await getConnection()
+          .getRepository(SKU_DATA)
+          .createQueryBuilder('skudata')
+          .select()
+          .where('skudata.sku ilike :sku', { sku: `%${sku}%` })
+          .orWhere('skudata.price ilike :price', { price: `%${price}%` })
+          .getMany();
+        return {
+          success: true,
+          data: find,
+        };
+      } else {
+        const find = await this.skuRepository.find();
+        return {
+          success: true,
+          data: find,
+        };
+      }
+    } catch (error) {
+      console.log('error message ::', error.message);
+      throw new NotFoundException({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
   async updateSku(id: number, body: SkuUpdateDto) {
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();

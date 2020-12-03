@@ -11,6 +11,8 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { IsString } from 'class-validator';
+import { categoryCreateDto } from './dto/category.dto';
 import { SkuCreateDto, SkuUpdateDto } from './dto/sku.dto';
 import { SkuService } from './sku.service';
 
@@ -23,9 +25,9 @@ export class SkuController {
     return this.skuService.getSku(query);
   }
 
-  @Post('addsku')
-  async addsku(@Body() body: SkuCreateDto) {
-    return this.skuService.addSKU(body);
+  @Post('createsku')
+  async createSku(@Body() body: SkuCreateDto) {
+    return this.skuService.createSKU(body);
   }
 
   @Patch(':id/updatesku')
@@ -53,4 +55,8 @@ export class SkuController {
     return this.skuService.getLogsById(id);
   }
 
+  @Post('createcategory')
+  async createCategory(@Body() body: categoryCreateDto) {
+    return this.skuService.createCategory(body);
+  }
 }

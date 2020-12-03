@@ -12,8 +12,8 @@ export class CATEGORY {
   id: number;
 
   @Column()
-  category: string;
+  category_name: string;
 
-  @OneToMany(() => SKU_DATA, (sku_category) => sku_category.category)
+  @OneToMany(() => SKU_DATA, (sku_category) => sku_category.category_id)
   sku_category: SKU_DATA[];
 }
