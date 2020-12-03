@@ -16,23 +16,30 @@ export class SkuCreateDto {
     @IsString()
     @IsOptional()
     note: string;
+
+    @IsString()
+    @IsOptional()
+    category_name: string;
 }
 
 export class SkuUpdateDto {
 
     @IsString()
-    @IsOptional()
+    // @IsOptional()
     sku: string;
 
     @IsNumber()
-    @IsOptional()
+    // @IsOptional()
     quantity: number;
 
     @IsString()
-    @IsOptional()
+    // @IsOptional()
     price: string;
 
     @IsString()
-    @IsOptional()
+    // @IsOptional()
     note: string;
+
+    @IsString()
+    category_name: string;
 }

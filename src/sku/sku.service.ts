@@ -7,7 +7,11 @@ import { getConnection } from 'typeorm';
 import { SkuCreateDto, SkuUpdateDto } from './dto/sku.dto';
 import { SKU_DATA } from '../entity/sku_data.entity';
 import { SKU_LOG } from '../entity/sku_log.entity';
-import { SkuLogRepository, SkuRepository } from './sku.repository';
+import {
+  categoryRepository,
+  SkuLogRepository,
+  SkuRepository,
+} from './sku.repository';
 import { CATEGORY } from 'src/entity/category.entity';
 
 @Injectable()
@@ -15,31 +19,19 @@ export class SkuService {
   constructor(
     private readonly skuRepository: SkuRepository,
     private readonly skulogRepository: SkuLogRepository,
+    private readonly categoryRepository: categoryRepository,
   ) {}
-
-  async createSKU(body: SkuCreateDto) {
+  async createCategory(body: any) {
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     let err = '';
-    const { sku, quantity, price, note } = body;
-
-    const sku_data = new SKU_DATA();
-    const sku_log = new SKU_LOG();
+    const { category_name } = body;
+    const category = new CATEGORY();
     try {
-      sku_data.sku = sku;
-      sku_data.quantity = quantity;
-      sku_data.price = price;
-      sku_data.note = note;
-      await queryRunner.manager.save(sku_data);
-
-      sku_log.sku = sku;
-      sku_log.quantity = quantity;
-      sku_log.price = price;
-      sku_log.note = note;
-      sku_log.sku_id = sku_data;
-      await queryRunner.manager.save(sku_log);
+      category.category_name = category_name;
+      await queryRunner.manager.save(category);
       await queryRunner.commitTransaction();
     } catch (error) {
       console.log('error message ::', error.message);
@@ -59,17 +51,46 @@ export class SkuService {
     }
   }
 
-  async createCategory(body: any) {
+  async createSKU(body: SkuCreateDto) {
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     let err = '';
-    const { category_name } = body;
+    const { sku, quantity, price, note, category_name } = body;
+
+    const sku_data = new SKU_DATA();
+    const sku_log = new SKU_LOG();
     const category = new CATEGORY();
     try {
-      category.category_name = category_name;
-      await queryRunner.manager.save(category);
+      sku_data.sku = sku;
+      sku_data.quantity = quantity;
+      sku_data.price = price;
+      sku_data.note = note;
+
+      const find = await this.categoryRepository.findOne({
+        where: { category_name: category_name },
+      });
+      if (category_name && !find) {
+        category.category_name = category_name;
+        await queryRunner.manager.save(category);
+        sku_data.category_id = category;
+      } else if (category_name && find) {
+        sku_data.category_id = find;
+      } else {
+        const found = await this.categoryRepository.findOne({
+          where: { id: 1 },
+        });
+        sku_data.category_id = found;
+      }
+      await queryRunner.manager.save(sku_data);
+
+      sku_log.sku = sku;
+      sku_log.quantity = quantity;
+      sku_log.price = price;
+      sku_log.note = note;
+      sku_log.sku_id = sku_data;
+      await queryRunner.manager.save(sku_log);
       await queryRunner.commitTransaction();
     } catch (error) {
       console.log('error message ::', error.message);
@@ -127,7 +148,7 @@ export class SkuService {
     await queryRunner.startTransaction();
     let err = '';
     try {
-      const { sku, quantity, price, note } = body;
+      const { sku, quantity, price, note, category_name } = body;
       const found = await this.skuRepository.findOne({ where: { id: id } });
       const sku_log = new SKU_LOG();
       if (!found) throw new Error('not found sku code.');
