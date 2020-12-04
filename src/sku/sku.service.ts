@@ -133,50 +133,50 @@ export class SkuService {
       if (!found) throw new Error('not found sku code.');
       if (found.quantity + quantity < 0) throw new Error(`quantity not enough`);
 
-      await getConnection()
-      .createQueryBuilder()
-      .update(SKU_DATA)
-      .set({
-        sku: sku,
-        quantity: found.quantity + quantity,
-        price: price,
-        note: note,
-      })
-      .where('id = :id', { id: found.id })
-      .execute();
-
-      // const find = await this.categoryRepository.findOne({
-      //   where: { category_name: category_name },
-      // });
-      // if (category_name && !find) {
-      //   category.category_name = category_name;
-      //   await queryRunner.manager.save(category);
-      //   await getConnection()
-      //     .createQueryBuilder()
-      //     .update(SKU_DATA)
-      //     .set({
-      //       sku: sku,
-      //       quantity: found.quantity + quantity,
-      //       price: price,
-      //       note: note,
-      //       category_id: category,
-      //     })
-      //     .where('id = :id', { id: found.id })
-      //     .execute();
-      // } else if (category_name && find) {
-      //   await getConnection()
-      //     .createQueryBuilder()
-      //     .update(SKU_DATA)
-      //     .set({
-      //       sku: sku,
-      //       quantity: found.quantity + quantity,
-      //       price: price,
-      //       note: note,
-      //       category_id: find,
-      //     })
-      //     .where('id = :id', { id: found.id })
-      //     .execute();
-      // }
+      const find = await this.categoryRepository.findOne({
+        where: { category_name: category_name },
+      });
+      if (category_name && !find) {
+        category.category_name = category_name;
+        await queryRunner.manager.save(category);
+        await getConnection()
+          .createQueryBuilder()
+          .update(SKU_DATA)
+          .set({
+            sku: sku,
+            quantity: found.quantity + quantity,
+            price: price,
+            note: note,
+            category_id: category,
+          })
+          .where('id = :id', { id: found.id })
+          .execute();
+      } else if (category_name && find) {
+        await getConnection()
+          .createQueryBuilder()
+          .update(SKU_DATA)
+          .set({
+            sku: sku,
+            quantity: found.quantity + quantity,
+            price: price,
+            note: note,
+            category_id: find,
+          })
+          .where('id = :id', { id: found.id })
+          .execute();
+      } else {
+        await getConnection()
+          .createQueryBuilder()
+          .update(SKU_DATA)
+          .set({
+            sku: sku,
+            quantity: found.quantity + quantity,
+            price: price,
+            note: note,
+          })
+          .where('id = :id', { id: found.id })
+          .execute();
+      }
       sku_log.sku_id = found;
       sku_log.sku = sku;
       sku_log.price = price;
