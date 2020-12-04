@@ -14,6 +14,7 @@ import {
   SkuRepository,
 } from '../repository/sku.repository';
 import { CATEGORY } from 'src/entity/category.entity';
+import { promises } from 'fs';
 
 @Injectable()
 export class SkuService {
@@ -51,7 +52,7 @@ export class SkuService {
         sku_data.category_id = find_cat;
       } else {
         const find_cat = await this.categoryRepository.findOne({
-          where: { category_name: "uncategory" },
+          where: { category_name: 'uncategory' },
         });
         sku_data.category_id = find_cat;
       }
@@ -89,7 +90,7 @@ export class SkuService {
         const query = await getConnection()
           .getRepository(SKU_DATA)
           .createQueryBuilder('skudata')
-          .innerJoinAndSelect('skudata.category_id','category_id');
+          .innerJoinAndSelect('skudata.category_id', 'category_id');
         if (sku) {
           query.andWhere('skudata.sku ilike :sku', { sku: `%${sku}%` });
         }
@@ -102,7 +103,9 @@ export class SkuService {
           data: find,
         };
       } else {
-        const find = await this.skuRepository.find({relations:['category_id']});
+        const find = await this.skuRepository.find({
+          relations: ['category_id'],
+        });
         return {
           success: true,
           data: find,
@@ -285,5 +288,30 @@ export class SkuService {
       console.log(error.message);
       throw new InternalServerErrorException();
     }
+  }
+
+  async getCategory() {
+    try {
+      const skus = await getConnection()
+        .getRepository(CATEGORY)
+        .createQueryBuilder('category')
+        .innerJoinAndSelect('category.sku_category', 'sku_category')
+        .getMany();
+
+      if (!skus) throw new Error(`not found`);
+      return {
+        success: true,
+        data: skus,
+      };
+    } catch (error) {
+      throw new NotFoundException({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async getById(id: number): Promise<SKU_DATA> {
+    return await this.skuRepository.getProductById(id);
   }
 }
