@@ -28,6 +28,6 @@ export class SKU_DATA {
   @OneToMany(() => SKU_LOG, (sku_log) => sku_log.sku_id)
   sku_log: SKU_LOG[];
 
-  @ManyToOne(() => CATEGORY, (category_id) => category_id.id)
-  category_id: CATEGORY;
+  @ManyToOne(() => CATEGORY, (category_id) => category_id.id, { cascade: true })
+  category_id: CATEGORY | number;
 }

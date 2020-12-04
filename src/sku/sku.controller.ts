@@ -20,17 +20,17 @@ import { SkuService } from './sku.service';
 @UsePipes(new ValidationPipe())
 export class SkuController {
   constructor(private skuService: SkuService) {}
-  @Get('getsku')
+  @Get('get')
   async getsku(@Query() query) {
     return this.skuService.getSku(query);
   }
 
-  @Post('createsku')
+  @Post('create')
   async createSku(@Body() body: SkuCreateDto) {
     return this.skuService.createSKU(body);
   }
 
-  @Patch(':id/updatesku')
+  @Patch(':id/update')
   async updateSku(@Param('id', ParseIntPipe) id, @Body() body: SkuUpdateDto) {
     return this.skuService.updateSku(id, body);
   }
@@ -40,7 +40,7 @@ export class SkuController {
     return this.skuService.findALL();
   }
 
-  @Delete(':id/deletesku')
+  @Delete(':id/delete')
   async deleteSku(@Param('id', ParseIntPipe) id) {
     return this.skuService.deleteSku(id);
   }

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { getConnection } from 'typeorm';
@@ -39,20 +40,20 @@ export class SkuService {
       sku_data.price = price;
       sku_data.note = note;
 
-      const find = await this.categoryRepository.findOne({
+      const find_cat = await this.categoryRepository.findOne({
         where: { category_name: category_name },
       });
-      if (category_name && !find) {
+      if (category_name && !find_cat) {
         category.category_name = category_name;
         await queryRunner.manager.save(category);
         sku_data.category_id = category;
-      } else if (category_name && find) {
-        sku_data.category_id = find;
+      } else if (category_name && find_cat) {
+        sku_data.category_id = find_cat;
       } else {
-        const find = await this.categoryRepository.findOne({
-          where: { id: 1 },
+        const find_cat = await this.categoryRepository.findOne({
+          where: { category_name: "uncategory" },
         });
-        sku_data.category_id = find;
+        sku_data.category_id = find_cat;
       }
       await queryRunner.manager.save(sku_data);
 
@@ -88,10 +89,7 @@ export class SkuService {
         const query = await getConnection()
           .getRepository(SKU_DATA)
           .createQueryBuilder('skudata')
-          .select();
-        // .andWhere('skudata.sku ilike :sku', { sku: `%${sku}%` })
-        // .andWhere('skudata.price ilike :price', { price: `%${price}%` })
-        // .getMany();
+          .innerJoinAndSelect('skudata.category_id','category_id');
         if (sku) {
           query.andWhere('skudata.sku ilike :sku', { sku: `%${sku}%` });
         }
@@ -104,7 +102,7 @@ export class SkuService {
           data: find,
         };
       } else {
-        const find = await this.skuRepository.find();
+        const find = await this.skuRepository.find({relations:['category_id']});
         return {
           success: true,
           data: find,
@@ -210,7 +208,7 @@ export class SkuService {
       const skus = await getConnection()
         .getRepository(SKU_DATA)
         .createQueryBuilder('skudata')
-        .leftJoinAndSelect('skudata.sku_log', 'sku_log')
+        .innerJoinAndSelect('skudata.sku_log', 'sku_log')
         .getMany();
 
       if (!skus) throw new Error(`not found`);
@@ -270,5 +268,22 @@ export class SkuService {
       sucess: true,
       data: found,
     };
+  }
+
+  async init(): Promise<void> {
+    try {
+      const find = await this.categoryRepository.findOne({
+        where: { category_name: 'uncategory' },
+      });
+
+      if (!find) {
+        const _category = new CATEGORY();
+        _category.category_name = 'uncategory';
+        await _category.save();
+      }
+    } catch (error) {
+      console.log(error.message);
+      throw new InternalServerErrorException();
+    }
   }
 }

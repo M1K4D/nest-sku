@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   Entity,
   OneToMany,
@@ -7,7 +8,7 @@ import {
 import { SKU_DATA } from './sku_data.entity';
 
 @Entity()
-export class CATEGORY {
+export class CATEGORY extends BaseEntity{
   @PrimaryGeneratedColumn()
   id: number;
 
